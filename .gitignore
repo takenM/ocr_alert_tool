@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Mac
+.DS_Store
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Tesseract bundle (local copy for build)
+tesseract/
+
+# Project Debug files
+debug_original.png
+debug_processed.png

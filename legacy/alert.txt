@@ -1,0 +1,86 @@
+Display.InputDialog Title: $'''基準値を入力してください''' Message: $'''この基準値以上の数字が見つかった場合お知らせします。半角数字で入力してください''' InputType: Display.InputType.SingleLine IsTopMost: False UserInput=> Threshold ButtonPressed=> ThresholdDialog
+
+IF ThresholdDialog = $'''Cancel''' THEN
+
+    EXIT Code: 0
+
+END
+
+Text.ToNumber Text: Threshold Number=> ThresholdNum
+
+Display.ShowMessageDialog.ShowMessage Title: $'''範囲指定''' Message: $'''OKを押してから3秒以内に監視したいエリアの左上にマウスを置いて待機してください''' Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed
+
+WAIT 3
+
+MouseAndKeyboard.GetMousePosition RelativeTo: MouseAndKeyboard.MousePositionRelativeTo.Screen X=> TopLeftX Y=> TopLeftY
+
+Display.ShowMessageDialog.ShowMessage Title: $'''範囲指定''' Message: $'''OKを押してから3秒以内に監視したいエリアの右下にマウスを置いて待機してください''' Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed
+
+WAIT 3
+
+MouseAndKeyboard.GetMousePosition RelativeTo: MouseAndKeyboard.MousePositionRelativeTo.Screen X=> BottomRightX Y=> BottomRightY
+
+LOOP LoopIndex FROM 1 TO 99999 STEP 1
+
+    OCR.ExtractTextWithOCR.ExtractTextFromRegionOfScreenWithWindowsOcr WindowsOcrLanguage: OCR.WindowsOcrLanguage.Japanese ImageWidthMultiplier: 5 ImageHeightMultiplier: 5 X1: TopLeftX X2: BottomRightX Y1: TopLeftY Y2: BottomRightY OcrText=> OcrText
+
+    Text.SplitText.Split Text: OcrText StandardDelimiter: Text.StandardDelimiter.NewLine DelimiterTimes: 1 Result=> OcrTextList
+
+    Variables.CreateNewList List=> SplittedOcrTextList
+
+    LOOP FOREACH CurrentItem3 IN OcrTextList
+
+        Text.SplitText.Split Text: CurrentItem3 StandardDelimiter: Text.StandardDelimiter.Space DelimiterTimes: 1 Result=> TextList
+
+        LOOP FOREACH CurrentItem4 IN TextList
+
+            Variables.AddItemToList Item: CurrentItem4 List: SplittedOcrTextList
+
+        END
+
+    END
+
+    Variables.CreateNewList List=> OcrNumList
+
+    LOOP FOREACH CurrentItem IN SplittedOcrTextList
+
+        BLOCK
+
+ON BLOCK ERROR
+
+
+
+END
+
+            Text.ToNumber Text: CurrentItem.Trimmed Number=> TextAsNumber
+
+            Variables.AddItemToList Item: TextAsNumber List: OcrNumList
+
+        END
+
+    END
+
+    LOOP FOREACH CurrentItem2 IN OcrNumList
+
+        IF CurrentItem2 >= ThresholdNum THEN
+
+            Workstation.PlaySound.PlaySystemSound SystemSound: System.SystemSound.Asterisk
+
+            Display.ShowMessageDialog.ShowMessage Title: $'''値の出現''' Message: $'''基準値以上の値が出現しました。
+
+このまま監視を続けますか？''' Icon: Display.Icon.Question Buttons: Display.Buttons.YesNo DefaultButton: Display.DefaultButton.Button2 IsTopMost: False ButtonPressed=> Continue
+
+            EXIT LOOP
+
+        END
+
+    END
+
+    IF Continue = $'''No''' THEN
+
+        EXIT Code: 0
+
+    END
+
+END
+
