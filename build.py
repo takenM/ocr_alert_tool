@@ -30,7 +30,9 @@ def build():
     print("Running build command:", " ".join(cmd))
     
     try:
-        subprocess.check_call(cmd)
+        # shell=True is often needed on Windows to find commands in PATH
+        use_shell = (os.name == 'nt')
+        subprocess.check_call(cmd, shell=use_shell)
         print("\nBuild Successful! Check the 'dist' folder.")
     except subprocess.CalledProcessError as e:
         print(f"\nBuild Failed: {e}")
