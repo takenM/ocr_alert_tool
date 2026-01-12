@@ -18,8 +18,12 @@ def build():
     # --add-data: Bundle the tesseract folder
     # --name: Output name
     
+    # Use sys.executable to run PyInstaller as a module
+    # This avoids "command not found" issues if Scripts folder isn't in PATH
     cmd = [
-        "pyinstaller",
+        sys.executable,
+        "-m",
+        "PyInstaller",
         "--noconsole",
         "--onefile",
         "--name=OCRAlertTool",
