@@ -9,7 +9,8 @@ import os
 
 class Monitor:
     def __init__(self):
-        self.sct = mss.mss()
+        # self.sct = mss.mss() # Removed: Initialized in process() for thread-safety on Windows
+        
         
         if getattr(sys, 'frozen', False):
             # If the application is run as a bundle (PyInstaller)
@@ -95,8 +96,10 @@ class Monitor:
         monitor = {"top": y1, "left": x1, "width": width, "height": height}
         
         # Capture
-        sct_img = self.sct.grab(monitor)
-        img = np.array(sct_img)
+        # Use mss in context manager within the thread to avoid threading issues on Windows
+        with mss.mss() as sct:
+            sct_img = sct.grab(monitor)
+            img = np.array(sct_img)
         
         # DEBUG: Save original capture
         cv2.imwrite("debug_original.png", img)
