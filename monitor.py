@@ -101,14 +101,9 @@ class Monitor:
             sct_img = sct.grab(monitor)
             img = np.array(sct_img)
         
-        # DEBUG: Save original capture
-        cv2.imwrite("debug_original.png", img)
         
         # Preprocess
         thresh = self.preprocess_image(img)
-        
-        # DEBUG: Save processed image
-        cv2.imwrite("debug_processed.png", thresh)
         
         # OCR
         # psm 6: Assume a single uniform block of text.
